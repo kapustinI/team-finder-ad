@@ -2,8 +2,16 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordChangeForm
 
-from projects.models import Project
+from team_finder.constants import GITHUB_HOST
 from .models import User
+
+
+class GitHubURLValidationMixin:
+    def clean_github_url(self):
+        url = self.cleaned_data.get("github_url", "")
+        if url and GITHUB_HOST not in url.lower():
+            raise forms.ValidationError(f"Ссылка должна вести на {GITHUB_HOST}")
+        return url
 
 
 class RegisterForm(forms.ModelForm):
@@ -56,7 +64,7 @@ class LoginForm(forms.Form):
         return cleaned_data
 
 
-class ProfileEditForm(forms.ModelForm):
+class ProfileEditForm(GitHubURLValidationMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = ("name", "surname", "avatar", "about", "phone", "github_url")
@@ -85,35 +93,5 @@ class ProfileEditForm(forms.ModelForm):
             raise forms.ValidationError("Этот номер уже используется")
         return normalized
 
-    def clean_github_url(self):
-        url = self.cleaned_data.get("github_url", "")
-        if url and "github.com" not in url.lower():
-            raise forms.ValidationError("Ссылка должна вести на github.com")
-        return url
-
-
 class UserPasswordChangeForm(PasswordChangeForm):
     pass
-
-
-class ProjectForm(forms.ModelForm):
-    class Meta:
-        model = Project
-        fields = ("name", "description", "github_url", "status")
-        labels = {
-            "name": "Название проекта",
-            "description": "Описание проекта",
-            "github_url": "Ссылка на GitHub",
-            "status": "Статус",
-        }
-
-    status = forms.ChoiceField(
-        choices=[(Project.STATUS_OPEN, "Открыт"), (Project.STATUS_CLOSED, "Закрыт")],
-        label="Статус",
-    )
-
-    def clean_github_url(self):
-        url = self.cleaned_data.get("github_url", "")
-        if url and "github.com" not in url.lower():
-            raise forms.ValidationError("Ссылка должна вести на github.com")
-        return url
