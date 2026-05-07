@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from projects.constants import PROJECTS_PAGE_SIZE
 from projects.forms import ProjectForm
 from projects.models import Project
 from projects.services import get_project_queryset, paginate_queryset
@@ -16,7 +17,7 @@ def root_redirect_view(request):
 
 def projects_list_view(request):
     projects = get_project_queryset()
-    page_obj = paginate_queryset(request, projects)
+    page_obj = paginate_queryset(request, projects, PROJECTS_PAGE_SIZE)
     return render(
         request,
         "projects/project_list.html",
@@ -73,8 +74,7 @@ def toggle_favorite_view(request, project_id):
         request.user.favorites.remove(project)
     else:
         request.user.favorites.add(project)
-        favorited = not favorited
-    return JsonResponse({"status": "ok", "favorited": favorited})
+    return JsonResponse({"status": "ok", "favorited": not favorited})
 
 
 @login_required
@@ -96,9 +96,8 @@ def toggle_participate_view(request, project_id):
         project.participants.remove(request.user)
     else:
         project.participants.add(request.user)
-        participant = not participant
 
-    return JsonResponse({"status": "ok", "participant": participant})
+    return JsonResponse({"status": "ok", "participant": not participant})
 
 
 @login_required

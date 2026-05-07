@@ -1,6 +1,4 @@
-from django.core.paginator import Paginator
-
-from users.constants import USERS_PAGE_SIZE
+from core.services import paginate_queryset
 
 
 def apply_variant1_filter(request, queryset):
@@ -25,11 +23,6 @@ def apply_variant1_filter(request, queryset):
         active_filter = ""
 
     return queryset.distinct(), active_filter
-
-
-def paginate_queryset(request, queryset, page_size=USERS_PAGE_SIZE):
-    paginator = Paginator(queryset, page_size)
-    return paginator.get_page(request.GET.get("page"))
 
 
 def build_query_prefix(active_filter):

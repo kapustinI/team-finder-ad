@@ -2,16 +2,8 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordChangeForm
 
-from team_finder.constants import GITHUB_HOST
+from core.mixins import GitHubURLValidationMixin
 from .models import User
-
-
-class GitHubURLValidationMixin:
-    def clean_github_url(self):
-        url = self.cleaned_data.get("github_url", "")
-        if url and GITHUB_HOST not in url.lower():
-            raise forms.ValidationError(f"Ссылка должна вести на {GITHUB_HOST}")
-        return url
 
 
 class RegisterForm(forms.ModelForm):
@@ -92,6 +84,7 @@ class ProfileEditForm(GitHubURLValidationMixin, forms.ModelForm):
         if qs.exists():
             raise forms.ValidationError("Этот номер уже используется")
         return normalized
+
 
 class UserPasswordChangeForm(PasswordChangeForm):
     pass

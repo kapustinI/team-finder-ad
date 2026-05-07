@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
+from users.constants import USERS_PAGE_SIZE
 from users.forms import LoginForm, ProfileEditForm, RegisterForm, UserPasswordChangeForm
 from users.models import User
 from users.services import apply_variant1_filter, build_query_prefix, paginate_queryset
@@ -62,7 +63,7 @@ def change_password_view(request):
 def participants_list_view(request):
     participants = User.objects.all().order_by("id")
     participants, active_filter = apply_variant1_filter(request, participants)
-    page_obj = paginate_queryset(request, participants)
+    page_obj = paginate_queryset(request, participants, USERS_PAGE_SIZE)
     query_prefix = build_query_prefix(active_filter)
 
     return render(

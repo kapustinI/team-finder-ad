@@ -1,7 +1,7 @@
 from django import forms
 
+from core.mixins import GitHubURLValidationMixin
 from projects.models import Project
-from users.forms import GitHubURLValidationMixin
 
 
 class ProjectForm(GitHubURLValidationMixin, forms.ModelForm):
